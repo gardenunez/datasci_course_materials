@@ -16,12 +16,15 @@ MOCK_TWEETS = [{'text':"can't stand in love"}, \
 
 def trim_tweet_text(text):
     result = ""
-    g  = lambda c: c.isalnum() or c == '-' or c == "'"
+    g  = lambda c: c.isalnum() or c in [u'-', u"'"]
     for char in text:
-        if g(char):
-            result = "%s%s" % (result, char)
-        else:
-            result = "%s " % result
+        try:
+            if g(char):
+                result = "%s%s" % (result, char)
+            else:
+                result = "%s " % result
+        except UnicodeDecodeError:
+            continue
     return result
 
 def get_sentiments(tweets, scores):
