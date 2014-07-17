@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
-
+"""
+Derive the sentiment of each tweet
+"""
 import sys
 import json
 from nltk.util import ngrams
@@ -14,7 +16,7 @@ MOCK_TWEETS = [{'text':"can't stand in love"}, \
         now I'm self-confident and walk in right direction"}, \
         {"text":"no fun, no screwed, screwed up. dont like!!! , like."}]
 
-def trim_tweet_text(text):
+def sanitize_text(text):
     result = ""
     g  = lambda c: c.isalnum() or c in [u'-', u"'"]
     for char in text:
@@ -31,7 +33,7 @@ def get_sentiments(tweets, scores):
     for tweet in tweets:
         if tweet.has_key('text'):
 	    text = tweet['text']
-            text = trim_tweet_text(text)
+            text = sanitize_text(text)
             splitted_text = text.split()
             score_map = {}
 	    degree = range(min(len(splitted_text),MAX_NGRAMS_DEGREE) + 1, 0, -1)
