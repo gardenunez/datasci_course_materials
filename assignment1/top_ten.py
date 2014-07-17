@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 """
-The happiest state
+Top ten hash tags
 """
 import sys
 import json
+import operator
 
 
 def parse_tweets(source_file):
@@ -16,10 +17,20 @@ def parse_tweets(source_file):
 def main():
     with  open(sys.argv[1]) as tweet_file:
         tweets = parse_tweets(tweet_file)
-        hashtags = {}
+        hashtag_count = {}
         for tweet in tweets:
             #get the hashtags and count
-            print tweet
+            if tweet.has_key('entities'):
+                hashtags = tweet['entities'].get('hashtags', [])
+                for ht in hashtags:
+                    text = ht['text']
+                    if hashtag_count.has_key(text):
+                        hashtag_count[text] += 1
+                    else:
+                        hashtag_count[text] = 1
+        sorted_hashtags = sorted(hashtag_count.iteritems(), key=operator.itemgetter(1))
+        for key, value in reversed(sorted_hashtags[-10:]):
+            print '%s %s' % (key, value)
         
 if __name__ == '__main__':
     main()
