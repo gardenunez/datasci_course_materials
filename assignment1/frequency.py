@@ -10,7 +10,7 @@ def compute_term_freq(tweets):
     total_occurrences = 0.0
     for tweet in tweets:
         if tweet.has_key('text'):
-            text = tweet['text'].lower()
+            text = sanitize_text(tweet['text'].lower())
             words = text.split()
             for wd in words:
                 if term_occurrences.has_key(wd):
@@ -23,6 +23,14 @@ def compute_term_freq(tweets):
         term_freq[term] = occurrence/total_occurrences
     return term_freq
 
+def sanitize_text(text):
+    result = ""
+    for char in text:
+        if char.isalnum():
+            result = '%s%s' % (result, char)
+        else:
+            result = '%s ' % result
+    return result.encode('utf-8')
 
 def parse_tweets(source_file):
     lines = []
