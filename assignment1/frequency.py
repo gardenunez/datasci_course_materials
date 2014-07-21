@@ -44,7 +44,7 @@ def main():
         tweets = parse_tweets(tweet_file)
         term_freq = compute_term_freq(tweets)
         for term, freq in term_freq.items():
-            print '%s %.4f' % ( term, freq)
+            print '%s %.8f' % ( term, freq)
 
 
 if __name__ == '__main__':
