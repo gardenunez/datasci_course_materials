@@ -4,7 +4,8 @@ Derive the sentiment of each tweet
 """
 import sys
 import json
-from nltk.util import ngrams
+from itertools import chain
+# from nltk.util import ngrams
 
 MAX_NGRAMS_DEGREE = 3
 
@@ -15,6 +16,18 @@ MOCK_TWEETS = [{'text':"can't stand in love"}, \
         {'text':"I was naïve once-in-a-lifetime , \
         now I'm self-confident and walk in right direction"}, \
         {"text":"no fun, no screwed, screwed up. dont like!!! , like."}]
+
+def ngrams(sequence, n, pad_left=False, pad_right=False, pad_symbol=None):
+    """ Return a sequence of ngrams from a sequence of items. """
+
+    if pad_left:
+        sequence = chain((pad_symbol,) * (n-1), sequence)
+    if pad_right:
+        sequence = chain(sequence, (pad_symbol,) * (n-1))
+    sequence = list(sequence)
+
+    count = max(0, len(sequence) - n + 1)
+    return [tuple(sequence[i:i+n]) for i in range(count)]
 
 def sanitize_text(text):
     result = ""
@@ -32,28 +45,28 @@ def sanitize_text(text):
 def get_sentiments(tweets, scores):
     for tweet in tweets:
         if tweet.has_key('text'):
-	    text = tweet['text']
+            text = tweet['text']
             text = sanitize_text(text)
             splitted_text = text.split()
             score_map = {}
-	    degree = range(min(len(splitted_text),MAX_NGRAMS_DEGREE) + 1, 0, -1)
+            degree = range(min(len(splitted_text),MAX_NGRAMS_DEGREE) + 1, 0, -1)
             ignore_words = []
-	    for g in degree:
-	        ng = ngrams(splitted_text, g)
-		for words in ng:
-		    term = ' '.join(words)
-		    if scores.has_key(term):
+            for g in degree:
+                ng = ngrams(splitted_text, g)
+                for words in ng:
+                    term = ' '.join(words)
+                    if scores.has_key(term):
                         #if multiple words term, ignore this ones if appears again
                         if len(words) > 1:
                             ignore_words.extend(words) 
                         elif term in ignore_words:
                             ignore_words.remove(term)
                             continue
-		        if score_map.has_key(term):
+                        if score_map.has_key(term):
                             score_map[term] += 1
                         else:
                             score_map[term] = 1
-	    score = sum([scores[key] * value for key, value in score_map.items()])
+            score = sum([scores[key] * value for key, value in score_map.items()])
             print score
 
 def parse_tweets(source_file):
@@ -76,7 +89,6 @@ def main():
         scores = parse_sentiment_file(sent_file)
         tweets = parse_tweets(tweet_file)
         get_sentiments(tweets, scores)
-	#get_sentiments(MOCK_TWEETS, scores)
     finally:
         sent_file.close()
         tweet_file.close()

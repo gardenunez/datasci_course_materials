@@ -4,7 +4,8 @@ The happiest state
 """
 import sys
 import json
-from nltk.util import ngrams
+#from nltk.util import ngrams
+from itertools import chain
 
 MAX_NGRAMS_DEGREE = 3
 
@@ -127,6 +128,7 @@ states_code={
     ,'WestVirginia':'WV'
     ,'Wyoming':'WY'
 }
+
 def sanitize_text(text):
     result = ""
     g  = lambda c: c.isalnum() or c in [u'-', u"'"]
@@ -140,6 +142,20 @@ def sanitize_text(text):
             continue
     return result
 
+
+def ngrams(sequence, n, pad_left=False, pad_right=False, pad_symbol=None):
+    """ Return a sequence of ngrams from a sequence of items. """
+
+    if pad_left:
+        sequence = chain((pad_symbol,) * (n-1), sequence)
+    if pad_right:
+        sequence = chain(sequence, (pad_symbol,) * (n-1))
+    sequence = list(sequence)
+
+    count = max(0, len(sequence) - n + 1)
+    return [tuple(sequence[i:i+n]) for i in range(count)]
+
+
 def get_sentiment(tweet, scores):
     score = 0
     if tweet.has_key('text'):
@@ -150,18 +166,18 @@ def get_sentiment(tweet, scores):
         ignore_words = []
         for g in degree:
             ng = ngrams(splitted_text, g)
-	    for words in ng:
-	        term = ' '.join(words)
-	        if scores.has_key(term):
+            for words in ng:
+                term = ' '.join(words)
+                if scores.has_key(term):
                     if len(words) > 1:
                         ignore_words.extend(words) 
                     elif term in ignore_words:
                         ignore_words.remove(term)
                         continue
-	                if score_map.has_key(term):
-                            score_map[term] += 1
+                    if score_map.has_key(term):
+                        score_map[term] += 1
                     else:
-                            score_map[term] = 1
+                        score_map[term] = 1
         score = sum([scores[key] * value for key, value in score_map.items()])
     return score or 0
 
