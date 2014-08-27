@@ -2,7 +2,6 @@ library("methods")
 library("lattice")
 library("ggplot2")
 library("caret")
-library("ggplot2")
 library("rpart")
 library("e1071")
 
